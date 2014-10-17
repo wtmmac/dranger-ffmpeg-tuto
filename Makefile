@@ -1,4 +1,4 @@
-LIBS = -lz -lavcodec -lavformat -lswscale `sdl-config --cflags --libs`
+LIBS = -lz -lm -lavutil -lavcodec -lavformat -lswscale `sdl-config --cflags --libs`
 CC = gcc
 CFLAGS = -g -Wall
 
@@ -8,10 +8,8 @@ SOURCES = $(wildcard *.c)
 all: $(TARGETS)
 
 %: %.c
-	$(CC) $< -Wall $(LIBS) -o $@
+		$(CC) $< -Wall $(LIBS) -o $@
 
 
 clean:
-	-rm -f $(TARGETS)
-
-
+		-rm -f $(TARGETS)
