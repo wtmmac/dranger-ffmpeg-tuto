@@ -972,6 +972,7 @@ int main(int argc, char *argv[]) {
 	}
 	// Register all formats and codecs
 	av_register_all();
+	avformat_network_init();
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) {
 		fprintf(stderr, "Could not initialize SDL - %s\n", SDL_GetError());
