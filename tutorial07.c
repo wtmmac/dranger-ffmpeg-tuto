@@ -915,7 +915,8 @@ int decode_thread(void *arg) {
 			SDL_Delay(10);
 			continue;
 		}
-
+		
+		// 对文件进行重复读取
 		if (av_read_frame(is->pFormatCtx, packet) < 0) {
 			if (is->pFormatCtx->pb->error == 0) {
 				SDL_Delay(100); /* no error; wait for user input */
