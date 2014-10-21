@@ -8,7 +8,7 @@ SOURCES = $(wildcard *.c)
 all: $(TARGETS)
 
 %: %.c
-		$(CC) $< -Wall $(LIBS) -o $@
+		$(CC) $< $(CFLAGS) $(LIBS) -o $@
 
 
 clean:
