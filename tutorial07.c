@@ -69,7 +69,7 @@ typedef struct VideoPicture {
 
 typedef struct VideoState {
 
-	AVFormatContext *pFormatCtx;
+	AVFormatContext *pFormatCtx; /*格式化上下文*/
 	int videoStream, audioStream;
 
 	int av_sync_type;
