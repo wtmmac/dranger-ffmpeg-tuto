@@ -26,72 +26,23 @@
 #define OUTPUT_YUV420P 0
 FILE *fp_open = NULL;
 
-//Callback
+// 读取缓冲区的回调函数
 int read_buffer(void *opaque, uint8_t *buf, int buf_size) {
-	if (!feof(fp_open)) {
+	if ( ! feof(fp_open) ) {
 		int true_size = fread(buf, 1, buf_size, fp_open);
 		return true_size;
 	} else {
 		return -1;
 	}
-
-}
-
-// important
-int64_t seek_func(void *opaque, int64_t offset, int whence) {
-	FILE *fp = (FILE*) opaque;
-	if (whence == AVSEEK_SIZE) {
-		return -1;
-	}
-	fseek(fp, offset, whence);
-	return ftell(fp);
 }
 
 unsigned char buff[5000];
 int bufflen;
 int pos;
 
-/*
- int read_packet(void *opaque, uint8_t *buf, int buf_size)
- {
- int size = buf_size;
- if (bufflen - pos < buf_size)
- size = bufflen-pos;
- if (size > 0)
- {
- memcpy(buf, buff+pos, size);
- pos += size;
- }
- return size;
- }
- int64_t seek(void* opaque, int64_t offset, int whence)
- {
- switch (whence)
- {
- case SEEK_SET:
- pos = offset;
- break;
- case SEEK_CUR:
- pos += offset;
- break;
- case SEEK_END:
- pos = bufflen-offset;
- break;
- case AVSEEK_SIZE:
- return bufflen;
- break;
- }
- return pos;
- }
- */
 int main(int argc, char* argv[]) {
 
 	AVFormatContext *pFormatCtx;
-
-	int ret1 = 0; //////
-	AVInputFormat *piFmt = NULL; //ttttt
-
-	int i, videoindex;
 	AVCodecContext *pCodecCtx;
 	AVCodec *pCodec;
 	char filepath[] = "haoshengyin720.mp4";
@@ -105,16 +56,15 @@ int main(int argc, char* argv[]) {
 	//AVIOContext中的缓存
 	unsigned char *avio_buffer = (unsigned char *) av_malloc(32768);
 	AVIOContext *avio_ctx = avio_alloc_context(avio_buffer, 32768, 0, NULL, read_buffer, NULL, NULL);
+	avio_ctx->seekable = 0; // important
 
-    // important
-	avio_ctx->seekable = 0;
-	// printf("can seek:%d\n", avio_ctx->seekable);
-
-	//step2:探测流格式///////////
-	ret1 = av_probe_input_buffer(avio_ctx, &piFmt, "", NULL, 0, 0);
-	if (ret1 < 0) {
+	// 探测流格式
+	AVInputFormat *piFmt = NULL;
+	int probe_ret= 0;
+	probe_ret = av_probe_input_buffer(avio_ctx, &piFmt, "", NULL, 0, 0);
+	if (probe_ret < 0) {
 		fprintf(stderr, "probe failed!\n");
-		//goto quit;
+		return -1;
 	} else {
 		fprintf(stdout, "probe success!\n");
 		fprintf(stdout, "format: %s[%s]\n", piFmt->name, piFmt->long_name);
@@ -125,35 +75,41 @@ int main(int argc, char* argv[]) {
 
 	pFormatCtx->flags = AVFMT_FLAG_CUSTOM_IO;
 
-	//return 0;//////////////////////
-	// filename 留空非NULL
+	// 打开输入流
 	if (avformat_open_input(&pFormatCtx, "", piFmt, NULL) != 0) {
 		printf("Couldn't open input stream.（无法打开输入流）\n");
 		return -1;
 	}
-	//return 0;//////////////////////
-	//if(av_find_stream_info(pFormatCtx)<0){  旧的函数
+
+	// 获取流信息
 	if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
 		printf("Couldn't find stream information.（无法获取流信息）\n");
 		return -1;
 	}
 
+	// 视频流确认
+	int i, videoindex;
 	videoindex = -1;
 	for (i = 0; i < pFormatCtx->nb_streams; i++)
 		if (pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO) {
 			videoindex = i;
 			break;
 		}
+
 	if (videoindex == -1) {
 		printf("Didn't find a video stream.（没有找到视频流）\n");
 		return -1;
 	}
+
+	// 解码器确认
 	pCodecCtx = pFormatCtx->streams[videoindex]->codec;
 	pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
 	if (pCodec == NULL) {
 		printf("Codec not found.（没有找到解码器）\n");
 		return -1;
 	}
+
+	// 打开解码器
 	if (avcodec_open2(pCodecCtx, pCodec, NULL) < 0) {
 		printf("Could not open codec.（无法打开解码器）\n");
 		return -1;
@@ -169,7 +125,7 @@ int main(int argc, char* argv[]) {
 	avpicture_fill((AVPicture *) pFrameYUV, out_buffer, PIX_FMT_YUV420P,
 			pCodecCtx->width, pCodecCtx->height);
 
-	//SDL----------------------------
+	// SDL初始化
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER)) {
 		printf("Could not initialize SDL - %s\n", SDL_GetError());
 		return -1;
