@@ -121,10 +121,14 @@ int main(int argc, char *argv[]) {
 	avpicture_fill((AVPicture *) pFrameRGB, buffer, PIX_FMT_RGB24,
 			pCodecCtx->width, pCodecCtx->height);
 
-	pSwsCtx = sws_getContext(pCodecCtx->width,
-			pCodecCtx->height, pCodecCtx->pix_fmt,
-			pCodecCtx->width, pCodecCtx->height,
-			PIX_FMT_RGB24, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+	pSwsCtx = sws_getContext(
+			pCodecCtx->width,
+			pCodecCtx->height,
+			pCodecCtx->pix_fmt,
+			pCodecCtx->width,
+			pCodecCtx->height,
+			PIX_FMT_RGB24,
+			SWS_FAST_BILINEAR, NULL, NULL, NULL);
 
 	if (pSwsCtx == NULL) {
 		fprintf(stderr, "Cannot initialize the sws context\n");
@@ -143,11 +147,9 @@ int main(int argc, char *argv[]) {
 			if (frameFinished) {
 
 				// Convert the image from its native format to RGB
-				sws_scale(pSwsCtx,
-							(const uint8_t * const *) pFrame->data,
-							pFrame->linesize, 0, pCodecCtx->height,
-							pFrameRGB->data,
-							pFrameRGB->linesize);
+				sws_scale(pSwsCtx, (const uint8_t * const *) pFrame->data,
+						pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
+						pFrameRGB->linesize);
 
 				// Save the frame to disk
 				if (++i <= 5)
