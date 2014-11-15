@@ -83,7 +83,8 @@ typedef struct VideoState {
 	double audio_clock;
 	AVStream *audio_st;
 	PacketQueue audioq;
-	uint8_t audio_buf[(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2];
+	//uint8_t audio_buf[(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3) / 2];
+	uint8_t *audio_buf;
 	unsigned int audio_buf_size;
 	unsigned int audio_buf_index;
 	AVPacket audio_pkt;
