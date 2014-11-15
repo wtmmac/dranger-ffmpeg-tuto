@@ -9,10 +9,10 @@ CC = gcc
 
 CFLAGS = -std=c99 -g -Wall
 
-ifeq ($(shell uname), Darwin) 
-    CFLAGS += -I/usr/local/ffmpeg-0.11.1/include/ -L/usr/local/ffmpeg-0.11.1/lib/
-    $(warning  $(CFLAGS))
-endif
+#ifeq ($(shell uname), Darwin) 
+#    CFLAGS += -I/usr/local/ffmpeg-0.11.1/include/ -L/usr/local/ffmpeg-0.11.1/lib/
+#    $(warning  $(CFLAGS))
+#endif
 
 TARGETS = $(patsubst %.c, %, $(wildcard *.c))
 SOURCES = $(wildcard *.c)
